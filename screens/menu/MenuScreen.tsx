@@ -5,7 +5,7 @@ import { RootTabScreenProps } from '../../types';
 export default function MenuScreen({ navigation }: RootTabScreenProps<'Menu'>) {
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Menu</Text>
+      <Text style={styles.title}>Dale</Text>
     </View>
   )
 }

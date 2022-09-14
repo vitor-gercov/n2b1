@@ -14,7 +14,6 @@ import Colors from '../constants/Colors';
 import useColorScheme from '../hooks/useColorScheme';
 import NotFoundScreen from '../screens/NotFoundScreen';
 import FoodCategoriesScreen from '../screens/foodCategories/FoodCategoriesScreen';
-import TabTwoScreen from '../screens/TabTwoScreen';
 import { RootStackParamList, RootTabParamList, RootTabScreenProps } from '../types';
 import LinkingConfiguration from './LinkingConfiguration';
 import RegisterFoodCategoryScreen from '../screens/foodCategories/RegisterFoodCategoryScreen';
