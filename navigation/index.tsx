@@ -12,12 +12,16 @@ import { ColorSchemeName, Pressable } from 'react-native';
 
 import Colors from '../constants/Colors';
 import useColorScheme from '../hooks/useColorScheme';
-import ModalScreen from '../screens/ModalScreen';
 import NotFoundScreen from '../screens/NotFoundScreen';
-import TabOneScreen from '../screens/TabOneScreen';
+import FoodCategoriesScreen from '../screens/foodCategories/FoodCategoriesScreen';
 import TabTwoScreen from '../screens/TabTwoScreen';
 import { RootStackParamList, RootTabParamList, RootTabScreenProps } from '../types';
 import LinkingConfiguration from './LinkingConfiguration';
+import RegisterFoodCategoryScreen from '../screens/foodCategories/RegisterFoodCategoryScreen';
+import RegisterFoodScreen from '../screens/menu/RegisterFoodScreen';
+import MenuScreen from '../screens/menu/MenuScreen';
+import CartScreen from '../screens/cart/CartScreen';
+import HistoricScreen from '../screens/historic/HistoricScreen';
 
 export default function Navigation({ colorScheme }: { colorScheme: ColorSchemeName }) {
   return (
@@ -40,8 +44,11 @@ function RootNavigator() {
     <Stack.Navigator>
       <Stack.Screen name="Root" component={BottomTabNavigator} options={{ headerShown: false }} />
       <Stack.Screen name="NotFound" component={NotFoundScreen} options={{ title: 'Oops!' }} />
-      <Stack.Group screenOptions={{ presentation: 'modal' }}>
-        <Stack.Screen name="Modal" component={ModalScreen} />
+      <Stack.Group screenOptions={{ presentation: 'modal', title: 'Nova categoria' }}>
+        <Stack.Screen name="RegisterFoodCategory" component={RegisterFoodCategoryScreen} />
+      </Stack.Group>
+      <Stack.Group screenOptions={{ presentation: 'modal', title: 'Nova comida' }}>
+        <Stack.Screen name="RegisterFood" component={RegisterFoodScreen} />
       </Stack.Group>
     </Stack.Navigator>
   );
@@ -58,24 +65,24 @@ function BottomTabNavigator() {
 
   return (
     <BottomTab.Navigator
-      initialRouteName="TabOne"
+      initialRouteName="FoodCategories"
       screenOptions={{
         tabBarActiveTintColor: Colors[colorScheme].tint,
       }}>
       <BottomTab.Screen
-        name="TabOne"
-        component={TabOneScreen}
-        options={({ navigation }: RootTabScreenProps<'TabOne'>) => ({
-          title: 'Tab One',
-          tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
+        name="FoodCategories"
+        component={FoodCategoriesScreen}
+        options={({ navigation }: RootTabScreenProps<'FoodCategories'>) => ({
+          title: 'Categorias',
+          tabBarIcon: ({ color }) => <TabBarIcon name="database" color={color} />,
           headerRight: () => (
             <Pressable
-              onPress={() => navigation.navigate('Modal')}
+              onPress={() => navigation.navigate('RegisterFoodCategory')}
               style={({ pressed }) => ({
                 opacity: pressed ? 0.5 : 1,
               })}>
               <FontAwesome
-                name="info-circle"
+                name="plus"
                 size={25}
                 color={Colors[colorScheme].text}
                 style={{ marginRight: 15 }}
@@ -85,12 +92,42 @@ function BottomTabNavigator() {
         })}
       />
       <BottomTab.Screen
-        name="TabTwo"
-        component={TabTwoScreen}
-        options={{
-          title: 'Tab Two',
-          tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
-        }}
+        name="Menu"
+        component={MenuScreen}
+        options={({ navigation }: RootTabScreenProps<'Menu'>) => ({
+          title: 'Menu',
+          tabBarIcon: ({ color }) => <TabBarIcon name="list" color={color} />,
+          headerRight: () => (
+            <Pressable
+              onPress={() => navigation.navigate('RegisterFood')}
+              style={({ pressed }) => ({
+                opacity: pressed ? 0.5 : 1,
+              })}>
+              <FontAwesome
+                name="plus"
+                size={25}
+                color={Colors[colorScheme].text}
+                style={{ marginRight: 15 }}
+              />
+            </Pressable>
+          ),
+        })}
+      />
+      <BottomTab.Screen
+        name="Cart"
+        component={CartScreen}
+        options={({ navigation }: RootTabScreenProps<'Cart'>) => ({
+          title: 'Carrinho',
+          tabBarIcon: ({ color }) => <TabBarIcon name="shopping-cart" color={color} />,
+        })}
+      />
+      <BottomTab.Screen
+        name="Historic"
+        component={HistoricScreen}
+        options={({ navigation }: RootTabScreenProps<'Historic'>) => ({
+          title: 'Histórico',
+          tabBarIcon: ({ color }) => <TabBarIcon name="clock-o" color={color} />,
+        })}
       />
     </BottomTab.Navigator>
   );

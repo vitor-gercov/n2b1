@@ -15,19 +15,32 @@ const linking: LinkingOptions<RootStackParamList> = {
     screens: {
       Root: {
         screens: {
-          TabOne: {
+          FoodCategories: {
             screens: {
-              TabOneScreen: 'one',
+              FoodCategoriesScreen: 'foodCategories',
             },
           },
-          TabTwo: {
+          Menu: {
             screens: {
               TabTwoScreen: 'two',
             },
           },
+          Cart: {
+            screens: {
+              CartScreen: 'cart'
+            }
+          },
+          Historic: {
+            screens: {
+              HistoricScreen: 'historic'
+            }
+          }
         },
       },
-      Modal: 'modal',
+      RegisterFoodCategory: 'registerFoodCategory',
+      EditFoodCategory: 'editFoodCategory',
+      RegisterFood: 'registerFood',
+      EditFood: 'editFood',
       NotFound: '*',
     },
   },
