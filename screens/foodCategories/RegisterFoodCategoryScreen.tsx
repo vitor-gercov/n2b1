@@ -1,14 +1,20 @@
 import { useState } from 'react';
-import { StyleSheet, TextInput, TouchableOpacity } from 'react-native';
+import { Alert, StyleSheet, TextInput, TouchableOpacity } from 'react-native';
 import { Text, View } from '../../components/Themed';
 import * as databaseService from '../../services/databaseService';
 
 export default function RegisterFoodCategoryScreen() {
-  const [description, setDescription] = useState('');
+  const [description, setDescription] = useState('')
+  const [formSubmitted, setFormSubmitted] = useState(false)
 
   async function createFoodCategory(): Promise<void> {
     if (description && description.trim() != '') {
-      await databaseService.createFoodCategory(description)
+      const foodCategoryCreated: boolean = await databaseService.createFoodCategory(description)
+      console.log(foodCategoryCreated)
+      if (foodCategoryCreated) {
+        return Alert.alert('Categoria cadastrada.')
+      }
+      return Alert.alert('Erro', 'Categoria não cadastrada.')
     }
   }
 
@@ -26,7 +32,7 @@ export default function RegisterFoodCategoryScreen() {
           value={description}
         />
         {
-          !(description && description.trim() != '') ?
+          formSubmitted && !(description && description.trim() != '') ?
             <Text style={styles.errorText}>
               Descrição não informada
             </Text> : null
@@ -34,6 +40,8 @@ export default function RegisterFoodCategoryScreen() {
         <View style={styles.marginBottom}></View>
         <TouchableOpacity style={styles.button}
           onPress={async () => {
+            setFormSubmitted(true)
+            // console.log(description)
             await createFoodCategory()
           }}>
           <Text style={styles.buttonText}>

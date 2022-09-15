@@ -10,7 +10,8 @@ export async function createTables(): Promise<unknown> {
         const createFoodCategoriesTableQuery: string = `CREATE TABLE IF NOT EXISTS FoodCategories
         (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            description TEXT NOT NULL
+            description TEXT NOT NULL,
+            createdAt text NOT NULL
         )`;
         const createFoodsTableQuery: string = `CREATE TABLE IF NOT EXISTS Foods
         (
@@ -18,11 +19,14 @@ export async function createTables(): Promise<unknown> {
             foodCategoryId INTEGER NOT NULL,
             description TEXT NOT NULL,
             price float NOT NULL,
+            createdAt text NOT NULL,
             FOREIGN KEY(foodCategoryId) REFERENCES FoodCategories(id)
         )`;
         const createSellsTableQuery: string = `CREATE TABLE IF NOT EXISTS Sells
         (
-            id INTEGER PRIMARY KEY AUTOINCREMENT   
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            totalPrice float NOT NULL,
+            createdAt text NOT NULL
         )`;
         const createSellFoodsTableQuery: string = `CREATE TABLE IF NOT EXISTS SellFoods
         (
@@ -62,12 +66,19 @@ export async function createTables(): Promise<unknown> {
 export async function createFoodCategory(foodCategoryDescription: string): Promise<boolean> {
     return new Promise((resolve, reject) => {
         const createFoodCategory: string =
-            `INSERT INTO FoodCategories (description) VALUES (${foodCategoryDescription})`;
+            `INSERT INTO FoodCategories (description) VALUES (?)`;
         const database: WebSQLDatabase = getDbConnection();
         database.transaction((transaction: SQLTransaction) => {
+            console.log('alo')
             transaction.executeSql(
-                createFoodCategory, [],
-                (transaction: any, list: any) => resolve(true)
+                createFoodCategory,
+                [foodCategoryDescription],
+                (transaction: any, result: any) => {
+                    if (result) {
+                        resolve(true)
+                    }
+                    reject(false)
+                }
             )
         })
     })
@@ -75,21 +86,40 @@ export async function createFoodCategory(foodCategoryDescription: string): Promi
 
 export async function getAllFoodCategories(): Promise<FoodCategory[]> {
     return new Promise((resolve, reject) => {
-        const getAllFoodCategoriesQuery: string = `SELECT * FROM FoodCategories`;
-        const database: WebSQLDatabase = getDbConnection();
+        const getAllFoodCategoriesQuery: string = `SELECT * FROM FoodCategories`
+        const database: WebSQLDatabase = getDbConnection()
         database.transaction((transaction: SQLTransaction) => {
             transaction.executeSql(
                 getAllFoodCategoriesQuery, [],
                 (transaction: any, list: any) => {
                     const foodCategories: FoodCategory[] = []
                     for (let i: number = 0; i < list.rows.length; i++) {
-                        const user: FoodCategory = {
+                        const foodCategory: FoodCategory = {
                             id: list.rows.item(i).id,
                             description: list.rows.item(i).description,
                         }
-                        foodCategories.push(user);
+                        foodCategories.push(foodCategory)
                     }
-                    resolve(foodCategories);
+                    resolve(foodCategories)
+                }
+            )
+        })
+    })
+}
+
+export async function deleteFoodCategory(foodCategoryId: number): Promise<boolean> {
+    return new Promise((resolve, reject) => {
+        const deleteFoodCategoryQuery: string = 'DELETE FROM FoodCategories WHERE id=?'
+        const database: WebSQLDatabase = getDbConnection()
+        database.transaction((transaction: SQLTransaction) => {
+            transaction.executeSql(
+                deleteFoodCategoryQuery,
+                [foodCategoryId],
+                (transaction: any, result: any) => {
+                    if (result) {
+                        resolve(true)
+                    }
+                    reject(false)
                 }
             )
         })
