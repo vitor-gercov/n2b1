@@ -107,6 +107,27 @@ export async function getAllFoodCategories(): Promise<FoodCategory[]> {
     })
 }
 
+export async function editFoodCategory(foodCategoryDescription: string, foodCategoryId: number): Promise<boolean> {
+    return new Promise((resolve, reject) => {
+        const createFoodCategory: string =
+            `UPDATE FoodCategories SET description=? WHERE id=?`;
+        const database: WebSQLDatabase = getDbConnection();
+        database.transaction((transaction: SQLTransaction) => {
+            console.log('alo')
+            transaction.executeSql(
+                createFoodCategory,
+                [foodCategoryDescription, foodCategoryId],
+                (transaction: any, result: any) => {
+                    if (result) {
+                        resolve(true)
+                    }
+                    reject(false)
+                }
+            )
+        })
+    })
+}
+
 export async function deleteFoodCategory(foodCategoryId: number): Promise<boolean> {
     return new Promise((resolve, reject) => {
         const deleteFoodCategoryQuery: string = 'DELETE FROM FoodCategories WHERE id=?'

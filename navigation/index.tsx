@@ -16,7 +16,6 @@ import NotFoundScreen from '../screens/NotFoundScreen';
 import FoodCategoriesScreen from '../screens/foodCategories/FoodCategoriesScreen';
 import { RootStackParamList, RootTabParamList, RootTabScreenProps } from '../types';
 import LinkingConfiguration from './LinkingConfiguration';
-import RegisterFoodCategoryScreen from '../screens/foodCategories/RegisterFoodCategoryScreen';
 import RegisterFoodScreen from '../screens/menu/RegisterFoodScreen';
 import MenuScreen from '../screens/menu/MenuScreen';
 import CartScreen from '../screens/cart/CartScreen';
@@ -43,12 +42,6 @@ function RootNavigator() {
     <Stack.Navigator>
       <Stack.Screen name="Root" component={BottomTabNavigator} options={{ headerShown: false }} />
       <Stack.Screen name="NotFound" component={NotFoundScreen} options={{ title: 'Oops!' }} />
-      <Stack.Group screenOptions={{ presentation: 'modal', title: 'Nova categoria' }}>
-        <Stack.Screen name="RegisterFoodCategory" component={RegisterFoodCategoryScreen} />
-      </Stack.Group>
-      <Stack.Group screenOptions={{ presentation: 'modal', title: 'Nova comida' }}>
-        <Stack.Screen name="RegisterFood" component={RegisterFoodScreen} />
-      </Stack.Group>
     </Stack.Navigator>
   );
 }
@@ -74,20 +67,6 @@ function BottomTabNavigator() {
         options={({ navigation }: RootTabScreenProps<'FoodCategories'>) => ({
           title: 'Categorias',
           tabBarIcon: ({ color }) => <TabBarIcon name="database" color={color} />,
-          headerRight: () => (
-            <Pressable
-              onPress={() => navigation.navigate('RegisterFoodCategory')}
-              style={({ pressed }) => ({
-                opacity: pressed ? 0.5 : 1,
-              })}>
-              <FontAwesome
-                name="plus"
-                size={25}
-                color={Colors[colorScheme].text}
-                style={{ marginRight: 15 }}
-              />
-            </Pressable>
-          ),
         })}
       />
       <BottomTab.Screen
@@ -96,20 +75,6 @@ function BottomTabNavigator() {
         options={({ navigation }: RootTabScreenProps<'Menu'>) => ({
           title: 'Menu',
           tabBarIcon: ({ color }) => <TabBarIcon name="list" color={color} />,
-          headerRight: () => (
-            <Pressable
-              onPress={() => navigation.navigate('RegisterFood')}
-              style={({ pressed }) => ({
-                opacity: pressed ? 0.5 : 1,
-              })}>
-              <FontAwesome
-                name="plus"
-                size={25}
-                color={Colors[colorScheme].text}
-                style={{ marginRight: 15 }}
-              />
-            </Pressable>
-          ),
         })}
       />
       <BottomTab.Screen

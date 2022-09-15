@@ -37,10 +37,6 @@ const linking: LinkingOptions<RootStackParamList> = {
           }
         },
       },
-      RegisterFoodCategory: 'registerFoodCategory',
-      EditFoodCategory: 'editFoodCategory',
-      RegisterFood: 'registerFood',
-      EditFood: 'editFood',
       NotFound: '*',
     },
   },
