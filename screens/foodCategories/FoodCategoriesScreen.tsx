@@ -46,7 +46,6 @@ export default function FoodCategoriesScreen({ navigation }: RootTabScreenProps<
 
   function getFoodCategories(): void {
     databaseService.getAllFoodCategories().then((foodCategories: FoodCategory[]) => {
-      console.log(foodCategories)
       setFoodCategories(foodCategories)
     })
   }

@@ -72,6 +72,9 @@ export const globalStyles = StyleSheet.create({
     backGroundRed: {
         backgroundColor: '#a00',
     },
+    backGroundGrey: {
+        backgroundColor: '#eee',
+    },
     textWhite: {
         color: '#fff'
     },
