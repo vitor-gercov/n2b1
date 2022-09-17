@@ -10,7 +10,7 @@ import DropDownPicker from 'react-native-dropdown-picker';
 import { Cart } from '../../models/cartModel';
 
 export default function MenuScreen({ navigation }: RootTabScreenProps<'Menu'>) {
-  const [cart, setCart] = useState(new Cart())
+  const [cart, setCart] = useState<Cart>(new Cart())
   const [foods, setFoods] = useState([new Food()])
   const [foodCategories, setFoodCategories] = useState([new FoodCategory()])
   const [categoryFilters, setCategoryFilters] = useState([new FoodCategory()])
@@ -26,13 +26,20 @@ export default function MenuScreen({ navigation }: RootTabScreenProps<'Menu'>) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
 
   useEffect(() => {
-    getFoods()
-    AsyncStorage.getItem('cart').then(async localStorage => {
-      if (localStorage) {
-        setCart(JSON.parse(localStorage))
-      }
+    const unsubscribe = navigation.addListener('focus', () => {
+      getFoods()
+      AsyncStorage.getItem('cart').then(async localStorage => {
+        if (localStorage) {
+          let cartFromStorage: Cart = JSON.parse(localStorage)
+          if (cartFromStorage.totalPrice < 0) {
+            cartFromStorage.totalPrice = 0
+          }
+          setCart(cartFromStorage)
+        }
+      })
     })
-  }, [])
+    return unsubscribe
+  }, [navigation])
 
   async function createFood(): Promise<void> {
     if (description && foodCategoryId && description.trim() != '') {
@@ -95,6 +102,9 @@ export default function MenuScreen({ navigation }: RootTabScreenProps<'Menu'>) {
       }} style={[globalStyles.button, globalStyles.backgroudGreen, globalStyles.alignSelfEnd]}>
         <Text style={globalStyles.textWhite}>Novo alimento</Text>
       </TouchableOpacity>
+      <Text>
+        Valor total: R$ {cart?.totalPrice ?? 0}
+      </Text>
       {/* <Text>
         Categoria
       </Text> */}
@@ -159,6 +169,9 @@ export default function MenuScreen({ navigation }: RootTabScreenProps<'Menu'>) {
                         if (selectedItem.quantity > 0) {
                           selectedItem.quantity--
                         }
+                        if (cart.totalPrice - food.price >= 0) {
+                          cart.totalPrice -= food.price
+                        }
                         cart.items = cart.items.map(item => {
                           if (item.food == selectedItem?.food) {
                             return selectedItem
@@ -187,11 +200,10 @@ export default function MenuScreen({ navigation }: RootTabScreenProps<'Menu'>) {
                     let selectedItem = storedCart.items.find(item => item.food.id == food.id)
                     if (!selectedItem) {
                       storedCart.items.push({ food, quantity: 1 })
-                      await AsyncStorage.setItem('cart', JSON.stringify(storedCart))
-                      setCart(storedCart)
-                      return
+                    } else {
+                      selectedItem.quantity++
                     }
-                    selectedItem.quantity++
+                    storedCart.totalPrice += food.price
                     storedCart.items = storedCart.items.map(item => {
                       if (item.food == selectedItem?.food) {
                         return selectedItem
@@ -200,14 +212,12 @@ export default function MenuScreen({ navigation }: RootTabScreenProps<'Menu'>) {
                     })
                     await AsyncStorage.setItem('cart', JSON.stringify(storedCart))
                     setCart(storedCart)
-                    console.log(selectedItem.food)
-                    console.log(food)
                   }}>
                     <FontAwesome name={'plus'} size={25} color={'#000'}></FontAwesome>
                   </TouchableOpacity>
                 </View>
                 <Text>
-                  Quantidade: {cart?.items?.find(item => item.food == food)?.quantity.toString()}
+                  Quantidade: {cart?.items?.find(item => item.food.id == food.id)?.quantity.toString() ?? 0}
                 </Text>
               </View>
             </View>)

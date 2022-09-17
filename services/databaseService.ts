@@ -1,5 +1,7 @@
 import { openDatabase, WebSQLDatabase, SQLTransaction, SQLError } from 'expo-sqlite'
 import { Food, FoodCategory } from '../models';
+import { Cart } from '../models/cartModel';
+import { Sell } from '../models/sellModal';
 
 function getDbConnection(): WebSQLDatabase {
     return openDatabase('pizzaria.db')
@@ -33,6 +35,7 @@ export async function createTables(): Promise<unknown> {
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             sellId INTEGER NOT NULL,    
             foodId INTEGER NOT NULL,
+            quantity INTEGER NOT NULL,
             FOREIGN KEY(sellId) REFERENCES Sells(id),
             FOREIGN KEY(foodId) REFERENCES Foods(id)
         )`;
@@ -65,17 +68,22 @@ export async function createTables(): Promise<unknown> {
 export async function createFoodCategory(foodCategoryDescription: string): Promise<boolean> {
     return new Promise((resolve, reject) => {
         const createFoodCategory: string =
-            `INSERT INTO FoodCategories (description) VALUES (?)`;
+            `INSERT INTO FoodCategories (description, createdAt) VALUES (?, ?)`;
         const database: WebSQLDatabase = getDbConnection();
         database.transaction((transaction: SQLTransaction) => {
+            const date: string = new Date().toISOString()
             transaction.executeSql(
                 createFoodCategory,
-                [foodCategoryDescription],
+                [foodCategoryDescription, date],
                 (transaction: any, result: any) => {
                     if (result) {
                         resolve(true)
                     }
                     reject(false)
+                },
+                (transaction, error) => {
+                    console.log(error)
+                    return true
                 }
             )
         })
@@ -146,13 +154,13 @@ export async function deleteFoodCategory(foodCategoryId: number): Promise<boolea
 
 export async function createFood(food: { foodCategoryId: number, description: string, price: number }): Promise<boolean> {
     return new Promise((resolve, reject) => {
-        const createFoodQuery: string = `INSERT INTO Foods (foodCategoryId, description, price) VALUES (?, ?, ?)`;
+        const createFoodQuery: string = `INSERT INTO Foods (foodCategoryId, description, price, createdAt) VALUES (?, ?, ?, ?)`;
         const database: WebSQLDatabase = getDbConnection();
         database.transaction((transaction: SQLTransaction) => {
-            console.log(food)
+            const date: string = new Date().toISOString()
             transaction.executeSql(
                 createFoodQuery,
-                [food.foodCategoryId, food.description, food.price],
+                [food.foodCategoryId, food.description, food.price, date],
                 (transaction: any, result: any) => {
                     if (result) {
                         resolve(true)
@@ -228,6 +236,74 @@ export async function deleteFood(foodId: number): Promise<boolean> {
                         resolve(true)
                     }
                     reject(false)
+                }
+            )
+        })
+    })
+}
+
+export async function createSell(cart: Cart): Promise<boolean> {
+    return new Promise((resolve, reject) => {
+        const createSellQuery: string = `INSERT INTO Sells (totalPrice, createdAt) VALUES (?, ?)`;
+        const database: WebSQLDatabase = getDbConnection()
+        database.transaction((transaction: SQLTransaction) => {
+            let date: string = new Date().toISOString()
+            transaction.executeSql(
+                createSellQuery,
+                [cart.totalPrice, date],
+                (transaction, result) => {
+                    if (result.insertId) {
+                        for (let item of cart.items) {
+                            const createSellFoodQuery: string = `INSERT INTO SellFoods (sellId, foodId, quantity) VALUES (?, ?, ?)`
+                            transaction.executeSql(
+                                createSellFoodQuery,
+                                [result.insertId, item.food.id, item.quantity],
+                                (transaction, result) => {
+                                    if (result) {
+                                        resolve(true)
+                                    }
+                                    reject(false)
+                                }
+                            )
+                        }
+                    }
+                },
+                (transaction, error) => {
+                    console.log(error)
+                    return true
+                }
+            )
+        })
+    })
+}
+
+export async function getAllSells(): Promise<Sell[]> {
+    return new Promise((resolve, reject) => {
+        let getAllFoodsQuery: string = `SELECT Sells.*, SellFoods.quantity, Foods.description FROM Sells LEFT JOIN SellFoods LEFT JOIN Foods WHERE Sells.id=SellFoods.sellId AND SellFoods.foodId=Foods.id`
+        let queryParams: any[] = []
+        const database: WebSQLDatabase = getDbConnection()
+        database.transaction((transaction: SQLTransaction) => {
+            transaction.executeSql(
+                getAllFoodsQuery,
+                [],
+                (transaction: any, list: any) => {
+                    const sells: Sell[] = []
+                    for (let i: number = 0; i < list.rows.length; i++) {
+                        const sell: Sell = {
+                            createdAt: list.rows.item(i).createdAt,
+                            items: list.rows.filter((item: any) => {
+                                return item.id == list.rows.item(i).id
+                            }).map((item: any) => {
+                                return {
+                                    food: item.description,
+                                    quantity: item.quantity
+                                }
+                            })
+                        }
+                        sells.push(sell)
+                        console.log(sell)
+                    }
+                    resolve(sells)
                 }
             )
         })
