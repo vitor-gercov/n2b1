@@ -14,6 +14,9 @@ export const globalStyles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
     },
+    width1: {
+        width: '60%'
+    },
     displayFlex: {
         display: 'flex',
         flexDirection: 'row'

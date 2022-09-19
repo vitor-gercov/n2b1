@@ -26,16 +26,20 @@ export default function MenuScreen({ navigation }: RootTabScreenProps<'Menu'>) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
 
   useEffect(() => {
-    const unsubscribe = navigation.addListener('focus', () => {
-      getFoods()
-      AsyncStorage.getItem('cart').then(async localStorage => {
-        if (localStorage) {
-          let cartFromStorage: Cart = JSON.parse(localStorage)
-          if (cartFromStorage.totalPrice < 0) {
-            cartFromStorage.totalPrice = 0
+    const unsubscribe: any = navigation.addListener('focus', async () => {
+      databaseService.getAllFoodCategories().then((foodCategories: FoodCategory[]) => {
+        setFoodCategories(foodCategories)
+        setCategoryFilters(foodCategories)
+        getFoods()
+        AsyncStorage.getItem('cart').then(async localStorage => {
+          if (localStorage) {
+            let cartFromStorage: Cart = JSON.parse(localStorage)
+            if (cartFromStorage.totalPrice < 0) {
+              cartFromStorage.totalPrice = 0
+            }
+            setCart(cartFromStorage)
           }
-          setCart(cartFromStorage)
-        }
+        })
       })
     })
     return unsubscribe
@@ -67,16 +71,11 @@ export default function MenuScreen({ navigation }: RootTabScreenProps<'Menu'>) {
 
   function getFoods(): void {
     databaseService.getAllFoods(foodCategoryFilter).then((foods: Food[]) => {
-      databaseService.getAllFoodCategories().then((foodCategories: FoodCategory[]) => {
-        setFoodCategories(foodCategories)
-        setCategoryFilters(foodCategories)
-        foods.map((food: Food) => {
-          food.categoryDescription = foodCategories.find((foodCategory: FoodCategory) => foodCategory.id == food.foodCategoryId)?.description
-          return food
-        })
-        console.log(foods)
-        setFoods(foods)
+      foods.map((food: Food) => {
+        food.categoryDescription = foodCategories.find((foodCategory: FoodCategory) => foodCategory.id == food.foodCategoryId)?.description
+        return food
       })
+      setFoods(foods)
     })
   }
 
@@ -105,10 +104,10 @@ export default function MenuScreen({ navigation }: RootTabScreenProps<'Menu'>) {
       <Text>
         Valor total: R$ {cart?.totalPrice ?? 0}
       </Text>
-      {/* <Text>
+      <Text>
         Categoria
-      </Text> */}
-      {/* <DropDownPicker
+      </Text>
+      <DropDownPicker
         placeholder='Selecione um item'
         open={isFilterOpen}
         value={foodCategoryFilter}
@@ -118,7 +117,15 @@ export default function MenuScreen({ navigation }: RootTabScreenProps<'Menu'>) {
         setOpen={setIsFilterOpen}
         setValue={setFoodCategoryFilter}
         setItems={setCategoryFilters}
-      /> */}
+        onChangeValue={(item) => {
+          getFoods()
+        }}
+      />
+      <TouchableOpacity onPress={() => {
+        setFoodCategoryFilter(NaN)
+      }} style={[globalStyles.button, globalStyles.backgroudBlue, globalStyles.alignSelfEnd]}>
+        <Text style={globalStyles.textWhite}>Limpar filtro</Text>
+      </TouchableOpacity>
       <ScrollView style={globalStyles.scrollView}>
         {
           foods?.map((food: Food, index: number) => {

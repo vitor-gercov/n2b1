@@ -82,7 +82,6 @@ export async function createFoodCategory(foodCategoryDescription: string): Promi
                     reject(false)
                 },
                 (transaction, error) => {
-                    console.log(error)
                     return true
                 }
             )
@@ -177,7 +176,7 @@ export async function getAllFoods(categoryId?: number): Promise<Food[]> {
         let getAllFoodsQuery: string = `SELECT * FROM Foods`
         let queryParams: any[] = []
         if (categoryId) {
-            getAllFoodsQuery += ` WHERE categoryId=?`
+            getAllFoodsQuery += ` WHERE foodCategoryId=?`
             queryParams.push(categoryId)
         }
         const database: WebSQLDatabase = getDbConnection()
@@ -288,24 +287,32 @@ export async function getAllSells(): Promise<Sell[]> {
                 [],
                 (transaction: any, list: any) => {
                     const sells: Sell[] = []
+                    const sellsIds: number[] = []
                     for (let i: number = 0; i < list.rows.length; i++) {
-                        const sell: Sell = {
-                            createdAt: list.rows.item(i).createdAt,
-                            items: list.rows.filter((item: any) => {
-                                return item.id == list.rows.item(i).id
-                            }).map((item: any) => {
-                                return {
-                                    food: item.description,
-                                    quantity: item.quantity
-                                }
+                        if (!sellsIds.includes(list.rows.item(i).id)) {
+                            sellsIds.push(list.rows.item(i).id)
+                            sells.push({
+                                id: list.rows.item(i).id,
+                                createdAt: list.rows.item(i).createdAt,
+                                items: []
                             })
                         }
-                        sells.push(sell)
-                        console.log(sell)
+                    }
+                    for (let sell of sells) {
+                        for (let i: number = 0; i < list.rows.length; i++) {
+                            if (sell.id == list.rows.item(i).id) {
+                                sell.items.push({
+                                    food: list.rows.item(i).description,
+                                    quantity: list.rows.item(i).quantity
+                                })
+                            }
+                        }
                     }
                     resolve(sells)
                 }
             )
+        }, (error: SQLError) => {
+            console.log(error)
         })
     })
 }

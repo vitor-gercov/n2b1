@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
-import { StyleSheet } from 'react-native';
+import { StyleSheet, ScrollView } from 'react-native';
 import { Text, View } from '../../components/Themed';
 import { RootTabScreenProps } from '../../types';
 import * as databaseService from '../../services/databaseService'
 import { Sell } from '../../models/sellModal';
+import { globalStyles } from '../../assets/styles/globalStyles';
 
 export default function HistoricScreen({ navigation }: RootTabScreenProps<'Historic'>) {
 
@@ -22,7 +23,26 @@ export default function HistoricScreen({ navigation }: RootTabScreenProps<'Histo
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Histórico</Text>
+      <ScrollView style={globalStyles.scrollView}>
+        {
+          sells?.map((sell, index: number) => {
+            return (
+              <View key={index} style={globalStyles.card}>
+                <Text style={globalStyles.label}>Data: {sell.createdAt.substring(0, 10)}</Text>
+                {
+                  sell.items?.map((item: { food: string, quantity: number }, itemIndex: number) => {
+                    return (
+                      <Text key={itemIndex}>
+                        {item.food} - {item.quantity.toString()}
+                      </Text>
+                    )
+                  })
+                }
+              </View>
+            )
+          })
+        }
+      </ScrollView >
     </View>
   )
 }

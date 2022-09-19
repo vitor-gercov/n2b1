@@ -35,7 +35,6 @@ export default function CartScreen({ navigation }: RootTabScreenProps<'Cart'>) {
 
   async function registerSell(): Promise<void> {
     if (cartItems && totalPrice) {
-      console.log('cu')
       const sellCreated: boolean = await databaseService.createSell({ items: cartItems, totalPrice })
       if (sellCreated) {
         Alert.alert('Venda criada', 'Acesse o histórico para ver os detalhes')
